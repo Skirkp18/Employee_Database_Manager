@@ -1,0 +1,31 @@
+{
+  "name": "employee_database_manager",
+  "version": "1.0.0",
+  "description": "This is a small node.js application that allows the user to manage a database of employees and their information.",
+  "main": "employees.js",
+  "scripts": {
+    "test": "N/A"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Skirkp18/Employee_Database_Manager.git"
+  },
+  "keywords": [
+    "database"
+  ],
+  "author": "Skirkp18",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Skirkp18/Employee_Database_Manager/issues"
+  },
+  "homepage": "https://github.com/Skirkp18/Employee_Database_Manager#readme",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "fs": "0.0.1-security",
+    "inquirer": "^7.3.3",
+    "jquery": "^3.5.1",
+    "jsdom": "^16.4.0",
+    "mysql": "^2.18.1",
+    "path": "^0.12.7"
+  }
+}
