@@ -3,6 +3,7 @@ var chalk = require("chalk");
 var inquirer = require('inquirer');
 var path = require("path");
 var fs = require("fs");
+const { stringify } = require("querystring");
 
 // Inquirer Questions
 const startQuestions = [
@@ -62,6 +63,7 @@ function start() {
 
                 case "Remove Employee":
                     console.log(chalk.red("Remove Employee"));
+                    removeEmployee();
                     break;
 
                 case "Edit Employee":
@@ -150,6 +152,36 @@ function addNewEmployee() {
         });
 };
 
+function removeEmployee() {
+    getCurrentEmployees()
+    inquirer.prompt([
+        {
+            name: "employee",
+            type: "list",
+            choices: function () {
+                var choiceArray = [];
+                for (var i = 0; i < currentEmployees.length; i++) {
+                    choiceArray.push(currentEmployees[i].first_name + " " + currentEmployees[i].last_name);
+                }
+                return choiceArray;
+            },
+            message: "Which Employee Would You Like To Remove?"
+        }
+    ]).then(function(answer) {
+        const name = answer.employee
+        const employeeToRemove = getEmployeeId(name);
+        console.log(employeeToRemove);
+        connection.query("DELETE FROM employee WHERE id = ?", employeeToRemove, function(err) {
+            if (err) throw err;
+            console.log(chalk.red("Employee Deleted!"));
+        });
+    });
+};
+
+function editEmployeeInfo() {
+
+};
+
 function getCurrentEmployees() {
     connection.query("SELECT * FROM employee", function (err, res) {
         if (err) throw err;
@@ -188,3 +220,14 @@ function getRoleId(role) {
         }
     }
 };
+
+function getEmployeeId(employee) {
+    for (let i = 0; i < currentEmployees.length; i++) {
+        const name = currentEmployees[i].first_name + " " + currentEmployees[i].last_name;
+        console.log(name);
+        if (employee === name) {
+        const employeeId = currentEmployees[i].id;
+        return employeeId;
+        }
+    }
+}
