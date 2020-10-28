@@ -88,10 +88,12 @@ function start() {
 
                 case "Add New Department":
                     console.log(chalk.inverse("Add New Department"));
+                    addNewDepartment();
                     break;
 
                 case "Add New Role":
                     console.log(chalk.inverse("Add New Role"));
+                    addNewRole();
                     break;
 
                 case "Exit":
@@ -354,6 +356,73 @@ function displayEmployeesByRole() {
             console.table(employeesToDisplay);
             start();
         };
+    });
+};
+
+// FUNCTIONS FOR SECTION THREE OF OPTIONS (ADD NEW ROLE, ADD NEW DEPARTMENT)
+function addNewRole() {
+    inquirer.prompt([
+        {
+        type: "prompt",
+        name: "roleTitle",
+        message: "What Is The Title For The New Role You Want To Add?"
+        },
+        {
+        type: "prompt",
+        name: "roleSalary",
+        message: "What Is The Salary For The New Role You Want To Add?",
+        validate: function (value) {
+            if (isNaN(value) === false) {
+                return true;
+            }
+            return false;
+        }
+        },
+        {
+        type: "prompt",
+        name: "roleDepartmentId",
+        message: "What Is The Department Id You Want To Attach To This New Role?",
+        validate: function (value) {
+            if (isNaN(value) === false) {
+                return true;
+            }
+            return false;
+        }
+        }
+    ]).then(function(answer) {
+        console.table(answer);
+        const roleTitle = answer.roleTitle;
+        const roleSalary = answer.roleSalary;
+        const roleDepartmentId = answer.roleDepartmentId;
+        const newRole = {
+            title: roleTitle,
+            salary: roleSalary,
+            department_id: roleDepartmentId
+        };
+        connection.query("INSERT INTO role SET ?", newRole, function(err) {
+            if (err) throw err;
+            console.log(chalk.inverse("New Role Added!"));
+            getCurrentRoles();
+            start();
+        });
+    });
+};
+
+function addNewDepartment() {
+    inquirer.prompt([
+        {
+            type: "prompt",
+            name: "name",
+            message: "What Is The Name Of The New Department You Want To Add?"
+        }
+    ]).then(function(answer) {
+        console.log(answer);
+        connection.query("INSERT INTO department SET ?", answer, function(err) {
+            if (err) throw err;
+            console.log(chalk.inverse("New Department Added!"))
+            getCurrentDepartments();
+            start();
+        });
     });
 };
 
