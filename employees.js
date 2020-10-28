@@ -52,7 +52,7 @@ function start() {
         type: "list",
         name: "startQuestion",
         message: "What would you like to do?",
-        choices: ["Add Employee", "Remove Employee", "Edit Employee", new inquirer.Separator(), "All Employees", "Employees By Department", "Employees By Role", new inquirer.Separator(), "Add New Department", "Add New Role", new inquirer.Separator()]
+        choices: ["Add Employee", "Remove Employee", "Edit Employee", new inquirer.Separator(), "All Employees", "Employees By Department", "Employees By Role", new inquirer.Separator(), "Add New Department", "Add New Role", new inquirer.Separator(), "Exit", new inquirer.Separator()]
     })
         .then(function (answer) {
             switch (answer.startQuestion) {
@@ -68,6 +68,7 @@ function start() {
 
                 case "Edit Employee":
                     console.log(chalk.yellow("Edit Employee"));
+                    editEmployeeInfo();
                     break;
 
                 case "All Employees":
@@ -89,10 +90,14 @@ function start() {
                 case "Add New Role":
                     console.log(chalk.inverse("Add New Role"));
                     break;
+
+                case "Exit":
+                    console.log("Closing Program");
+                    connection.end();
+                    break;
             }
         });
 };
-
 
 function addNewEmployee() {
     inquirer.prompt([
@@ -144,6 +149,8 @@ function addNewEmployee() {
                     connection.query("INSERT INTO employee SET ?", newEmployee, function(err) {
                         if (err) throw err;
                         console.log("Employee Added Succesfully!");
+                        getCurrentEmployees();
+                        start();
                     });
                 
 
@@ -153,7 +160,6 @@ function addNewEmployee() {
 };
 
 function removeEmployee() {
-    getCurrentEmployees()
     inquirer.prompt([
         {
             name: "employee",
@@ -174,12 +180,73 @@ function removeEmployee() {
         connection.query("DELETE FROM employee WHERE id = ?", employeeToRemove, function(err) {
             if (err) throw err;
             console.log(chalk.red("Employee Deleted!"));
+            getCurrentEmployees();
+            start();
         });
     });
 };
 
 function editEmployeeInfo() {
-
+    inquirer.prompt([
+        {
+            name: "employee",
+            type: "list",
+            choices: function () {
+                var choiceArray = [];
+                for (var i = 0; i < currentEmployees.length; i++) {
+                    choiceArray.push(currentEmployees[i].first_name + " " + currentEmployees[i].last_name);
+                }
+                return choiceArray;
+            },
+            message: "Which Employee Would You Like To Edit?"
+        }
+    ]).then(function(answer) {
+        const name = answer.employee
+        const employeeToEdit = getEmployeeId(name);
+        inquirer.prompt([
+            {
+                type: "prompt",
+                name: "first_name",
+                message: "Update Employee's First Name"
+            },
+            {
+                type: "prompt",
+                name: "last_name",
+                message: "Update Employee's Last Name"
+            },
+            {
+                name: "role",
+                type: "list",
+                choices: function () {
+                    var choiceArray = [];
+                    for (var i = 0; i < currentRoles.length; i++) {
+                        choiceArray.push(currentRoles[i].title);
+                    }
+                    return choiceArray;
+                },
+                message: "What Is The Employee's New Role?"
+            },
+            {
+                name: "manager_id",
+                type: "prompt",
+                message: "Who Is The Employees New Manager? (Please Enter Manager_ID)",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        ])
+            .then(function (answer) {
+                        connection.query(`UPDATE employee SET first_name = '${answer.first_name}', last_name = '${answer.last_name}', role_id = '${getRoleId(answer.role)}', manager_id = '${answer.manager_id}' WHERE id = ${employeeToEdit}`,  function(err) {
+                            if (err) throw err;
+                            console.log("Employee Info Updated!")
+                            getCurrentEmployees();
+                            start();
+                        });
+            });
+    })
 };
 
 function getCurrentEmployees() {
