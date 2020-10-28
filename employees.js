@@ -46,7 +46,7 @@ connection.connect(function (err) {
 });
 
 
-//   start function that starts inquier
+// FUNCTION THAT STARTS INQUIRER
 function start() {
     inquirer.prompt({
         type: "list",
@@ -72,11 +72,13 @@ function start() {
                     break;
 
                 case "All Employees":
-                    console.log(chalk.blue("Viewing All Employess"));
+                    console.log(chalk.blue("Viewing All Employees:"));
+                    displayAllEmployees();
                     break;
 
                 case "Employees By Department":
                     console.log(chalk.magenta("Viewing Employees By Departement"));
+                    displayEmployeesByDepartment();
                     break;
 
                 case "Employees By Role":
@@ -99,6 +101,7 @@ function start() {
         });
 };
 
+// FUNCTIONS FOR SECTION ONE OF OPTIONS (ADD, REMOVE, EDIT)
 function addNewEmployee() {
     inquirer.prompt([
         {
@@ -249,6 +252,67 @@ function editEmployeeInfo() {
     })
 };
 
+// FUNCTIONS FOR SECTION TWO OF OPTIONS (ALL EMPLOYESS, EMPLOYEES BY DEPARTMENT, EMPLOYEES BY ROLE)
+function displayAllEmployees() {
+    const allEmployeesArray = [];
+    for (let i = 0; i < currentEmployees.length; i++) {
+        const departmentId = getDepartmentId(currentEmployees[i].role_id)
+        const employee = {
+        FirstName: currentEmployees[i].first_name,
+        LastName: currentEmployees[i].last_name,
+        Role: getRoleTitle(currentEmployees[i].role_id),
+        Salary: getRoleSalary(currentEmployees[i].role_id),
+        Department: getDepartment(departmentId)
+        };
+        allEmployeesArray.push(employee);
+    }
+    console.table(allEmployeesArray);
+    start();
+};
+
+function displayEmployeesByDepartment() {
+    const employeesToDisplay = [];
+    inquirer.prompt([
+        {
+            name: "department",
+            type: "list",
+            choices: function () {
+                var choiceArray = [];
+                for (var i = 0; i < currentDepartments.length; i++) {
+                    choiceArray.push(currentDepartments[i].name);
+                }
+                return choiceArray;
+            },
+            message: "Which Department Would You Like To See All Employees In?"
+        }
+    ]).then(function(answer) {
+        const department = answer.department;
+        for (let i = 0; i < currentEmployees.length; i++) {
+        const departmentId = getDepartmentId(currentEmployees[i].role_id)
+        const employeeDepartment = getDepartment(departmentId)
+
+            if (department === employeeDepartment) {
+                employee = {
+                    FirstName: currentEmployees[i].first_name,
+                    LastName: currentEmployees[i].last_name,
+                    Role: getRoleTitle(currentEmployees[i].role_id)
+                };
+                employeesToDisplay.push(employee);
+            };
+        };
+
+        if (employeesToDisplay[0] == undefined) {
+        console.log(chalk.magenta(`There Are No Employees In The ${department} Department`))
+        start();
+        } else {
+        console.log(chalk.magenta(`Viewing All Employees In The ${department} Department`))
+        console.table(employeesToDisplay);
+        start();
+        };
+    });
+};
+
+// FUNCTIONS TO PULL FROM DATABASE AND SET INFO TO ARRAY
 function getCurrentEmployees() {
     connection.query("SELECT * FROM employee", function (err, res) {
         if (err) throw err;
@@ -279,6 +343,8 @@ function getCurrentDepartments() {
     });
 };
 
+
+// FUNCTIONS TO GET INFORMATION ON EMPLOYEES BASED UPON NAME
 function getRoleId(role) {
     for (let i = 0; i < currentRoles.length; i++) {
         if (role === currentRoles[i].title) {
@@ -298,3 +364,40 @@ function getEmployeeId(employee) {
         }
     }
 }
+
+function getRoleTitle(id) {
+    for (let i = 0; i < currentRoles.length; i++) {
+        if (id === currentRoles[i].id) {
+            const title = currentRoles[i].title;
+            return title
+        }
+    }
+}
+
+function getRoleSalary (id) {
+    for (let i = 0; i < currentRoles.length; i++) {
+        if (id === currentRoles[i].id) {
+            const salary = currentRoles[i].salary;
+            return salary;
+        }
+        
+    }
+};
+
+function getDepartmentId(id) {
+    for (let i = 0; i < currentRoles.length; i++) {
+        if (id === currentRoles[i].department_id) {
+            const departmentId = currentRoles[i].id;
+            return departmentId;
+            }
+    }
+};
+
+function getDepartment(id) {
+    for (let i = 0; i < currentDepartments.length; i++) {
+        if (id === currentDepartments[i].id) {
+            const department = currentDepartments[i].name;
+            return department;
+        }
+    }
+};
