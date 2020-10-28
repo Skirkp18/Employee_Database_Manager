@@ -3,7 +3,7 @@
 ![GitHub](https://img.shields.io/github/downloads/Skirkp18/Employee_Database_Manager/total) ![GitHub](https://img.shields.io/github/languages/top/Skirkp18/Employee_Database_Manager) ![GitHub](https://img.shields.io/badge/license-MIT-green?style=flat) 
 
 ## Description
-This is a basic node.js application that allows a user to manage a databse of employees.
+This is a basic node.js application that allows a user to manage a database of employees, roles and departments. This program allows you to add, remove and edit current employees. It also lets you view all employees as well as all employees by department or role. You can also add a new role or department for employees.
 ## Table of Contents 
   - [Installation](#installation)
   - [Usage](#usage)
