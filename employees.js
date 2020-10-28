@@ -83,6 +83,7 @@ function start() {
 
                 case "Employees By Role":
                     console.log(chalk.cyan("Employees By Role"));
+                    displayEmployeesByRole();
                     break;
 
                 case "Add New Department":
@@ -308,6 +309,50 @@ function displayEmployeesByDepartment() {
         console.log(chalk.magenta(`Viewing All Employees In The ${department} Department`))
         console.table(employeesToDisplay);
         start();
+        };
+    });
+};
+
+function displayEmployeesByRole() {
+    const employeesToDisplay = [];
+    inquirer.prompt([
+        {
+            name: "role",
+            type: "list",
+            choices: function () {
+                var choiceArray = [];
+                for (var i = 0; i < currentRoles.length; i++) {
+                    choiceArray.push(currentRoles[i].title);
+                }
+                return choiceArray;
+            },
+            message: "Which Role Would You Like To See All Employees In?"
+        }
+    ]).then(function(answer) {
+        const role = answer.role;
+        console.log(role);
+        for (let i = 0; i < currentEmployees.length; i++) {
+            const departmentId = getDepartmentId(currentEmployees[i].role_id);
+            const employeeDepartment = getDepartment(departmentId);
+            const firstName = currentEmployees[i].first_name;
+            const lastName = currentEmployees[i].last_name;
+            const employeeRole = getRoleTitle(currentEmployees[i].role_id);
+            if (role == employeeRole) {
+                const employee = {
+                    FirstName: firstName,
+                    LastName: lastName,
+                    Department: employeeDepartment
+                };
+                employeesToDisplay.push(employee);
+            };
+        };
+        if (employeesToDisplay[0] == undefined) {
+            console.log(chalk.magenta(`There Are No Employees In The ${role} Role`))
+            start();
+        } else {
+            console.log(chalk.magenta(`Viewing All Employees In The ${role} Role`))
+            console.table(employeesToDisplay);
+            start();
         };
     });
 };
